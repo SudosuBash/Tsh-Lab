@@ -1,15 +1,17 @@
 #include <cmd_parser.h>
 #include <stdlib.h>
+#include <job.h>
 #include <string.h>
+#include <stdio.h>
 #define E_NOEND -1
 
-int sep_pipes(const char *cmdline,pstring_array* recv) {
+int sep_pipes(char *cmdline,pstring_array* recv) {
     //管道支持
     static pstring_array arrs;
     init_str_arr(&arrs);
 
     size_t sz = strlen(cmdline);
-    char* buf = cmdline;
+    char* buf = (char*)cmdline;
     while(*buf && (*buf == ' '))
         buf++;
     while(buf < cmdline + sz) {
@@ -26,21 +28,24 @@ int sep_pipes(const char *cmdline,pstring_array* recv) {
     return 0;
 }
 
-int isbg(const char* cmdline) {
+int isbg(char* cmdline) {
     size_t sl = strlen(cmdline);
-    while(cmdline[sl] != '\n' && cmdline[sl] != ' ' && sl >= 0)
+    while((cmdline[sl] == '\n' || cmdline[sl] == ' ' || cmdline[sl] == 0) && sl >= 0)
         sl--;
-    return cmdline[sl] == '&';
+    if(cmdline[sl] == '&') {
+        cmdline[sl] = 0;
+        return 1;
+    }
+    return 0;
 }
 
 //用于解析单行命令,不用改
-void parseline(const char *cmdline, char **argv) 
+void parseline(char *cmdline, char **argv) 
 {
     static char array[MAXLINE]; /* holds local copy of command line */
     char *buf = array;          /* ptr that traverses command line */
     char *delim;                /* points to first space delimiter */
     int argc;                   /* number of args */
-    int bg;                     /* background job? */
 
     strcpy(buf, cmdline);
     size_t sl = strlen(buf)-1;
@@ -81,4 +86,26 @@ void parseline(const char *cmdline, char **argv)
     }
     argv[argc] = NULL;
     
+}
+
+//此类命令不能丢在fork和管道中
+int builtin_cmd_not_fork(char** argv,int i) {
+    
+    if(strcmp(argv[0],"bg") == 0 || strcmp(argv[0],"fg") == 0) {
+        if(i > 0) return -1;
+        do_bgfg(argv);
+        return 1;
+    } else if(strcmp(argv[0],"quit") == 0) {
+        if(i > 0) return -1;
+        exit(0);
+    }
+    return 0;
+}
+int builtin_cmd(char **argv) //此类命令可以丢在管道中
+{
+    if(strcmp(argv[0],"jobs") == 0) {
+        listjobs();
+        return 1;
+    }
+    return 0;     /* not a builtin command */
 }

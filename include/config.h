@@ -6,7 +6,7 @@
 #define MAXJOBS      16   /* max jobs at any point in time */
 #define MAXJID    1<<16   /* max job ID */
 #define MAXSUBJOBID  32
-#define DEBUG 1
+// #define DEBUG 1
 
 /* Utility macros */
 #ifndef min

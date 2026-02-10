@@ -90,8 +90,12 @@ void push_to_arr(pstring_array arr, pstring str) {
         arr->strings = (ppstring)calloc(1,sizeof(pstring));
         arr->arr_length = 1;
     } else {
-        arr->strings = (ppstring)realloc(arr->strings,sizeof(pstring));
         arr->arr_length ++;
+        arr->strings = (ppstring)realloc(arr->strings,sizeof(pstring) * arr->arr_length);
+        // arr->strings = (ppstring)realloc(arr->strings,sizeof(pstring));
+        //又是内存分配的bug
+        //大问题, 字符串解析都错了, 要真实工程项目敢出现这个错误
+        
     }
     arr->strings[arr->arr_length-1] = str;
 }

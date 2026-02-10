@@ -23,24 +23,45 @@ handler_t *Signal(int signum, handler_t *handler)
     return (old_action.sa_handler);
 }
 
+void sigint_handler(int _) {
+    // 其实压根就不用管SIGINT
+    // 原因很简单，触发SIGINT的是前台进程, 实际上SHELL触发的是SIGCHLD
+    // 回收工作是shell的SIGCHLD做的，跟SIGINT不沾边
+    return;
+}
+
+void sigtstp_handler(int _) {
+    //啥都不用管, 原因同上
+    return;
+}
+/**
+ * 问题还是出在 SIGCHLD Handler 上
+ */
 void sigchld_handler(int _) {
     int stat;
     pid_t pid;
     while((pid = waitpid(-1,&stat,WNOHANG | WUNTRACED)) > 0) {
         if(pid < 0 && errno != ECHILD) unix_error("E: waitpid error.");
-        if(jpstatus(pid)) {
-            pid_t p = getpgrp();
-            tcsetpgrp(STDIN_FILENO,p);//交还控制权给终端
-        }
-        if(WIFSTOPPED(pid)) {
+        if(WIFSTOPPED(stat)) {
+#if DEBUG
             printf("PID %d Process Stopped.\n",pid);
+#endif
             update_pid_status(pid,ST);
-        } else if(WIFEXITED(pid)) {
+            // tcsetpgrp(STDIN_FILENO,getpgrp());//进程STOP(Ctrl + Z)直接还给终端
+        } else if(WIFEXITED(stat)) {
+#if DEBUG
             printf("PID %d Process Exited.\n",pid);
+#endif
             update_pid_status(pid,DONE);
-        } else if(WIFSIGNALED(pid)) {
+
+        } else if(WIFSIGNALED(stat)) {
+#if DEBUG
             printf("PID %d Process Signaled.\n",pid);
+#endif
             update_pid_status(pid,DONE);
+        }
+        if(get_fg_jid() == -1) { //前台没有进程
+            tcsetpgrp(STDIN_FILENO,getpgrp());
         }
     }
 }

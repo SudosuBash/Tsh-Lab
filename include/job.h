@@ -41,9 +41,17 @@ int addjob(char cmd[MAXLINE]);
 
 void addpid(int jid,int pid,pid_stat_t stat);
 int pgid2jid(pid_t pgid);
+pid_t jid2pgid(int jid);
 pid_stat_t jstatus(int jid);
 pid_stat_t jpstatus(int pid);
 void update_pid_status(int pid,pid_stat_t stat);
+void update_pgid_status(int pgid,pid_stat_t stat);
 void recyclejob();
 void waitfg(int jid);
+int get_fg_jid();
+char* jid_cmd(int jid);
+void listjobs();
+void pgid_stat_fg(int pgid);
+void pgid_stat_bg(int pgid);
+void do_bgfg(char **argv);
 #endif

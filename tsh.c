@@ -27,6 +27,8 @@ int rd_command(char cmdline[MAXLINE]) { //读取命令
         char buf[MAXLINE] = {0};
         if ((fgets(buf, MAXLINE, stdin) == NULL) && ferror(stdin))
             unix_error("fgets error");
+        
+        fflush(stdout);
         size_t len = strlen(buf) - 1; //去掉 '\n'
         if(buf[0] == 0 && strl == 0) break;
         while((buf[len] == ' ' || buf[len] == '\n') && len>=0) 
@@ -50,6 +52,8 @@ int main() {
     char cmdline[MAXLINE] = {0};
     tcsetpgrp(STDIN_FILENO,getpgrp());//交还控制权给终端
     signal(SIGCHLD,sigchld_handler);
+    signal(SIGINT,sigint_handler);
+    signal(SIGTSTP,sigtstp_handler);
     signal(SIGTTOU, SIG_IGN);
     signal(SIGTTIN, SIG_IGN);
     while(1) {

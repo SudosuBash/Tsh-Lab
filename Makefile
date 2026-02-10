@@ -5,7 +5,7 @@ LDFLAGS :=
 SRCDIR := src
 SRCS := tsh.c $(wildcard $(SRCDIR)/*.c)
 OBJS := $(SRCS:.c=.o)
-TARGET := tsh
+TARGET := tsh.out
 
 .PHONY: all clean run
 
