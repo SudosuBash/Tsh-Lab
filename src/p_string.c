@@ -43,9 +43,12 @@ void append_c_str(pstring src,char* buf) {
 }
 
 void free_str(ppstring string) {
-    free((*string)->buf);
-    free(*string);
-    *string = NULL;
+    if(*string != NULL) {
+        free((*string)->buf);
+        free(*string);
+        *string = NULL;
+    }
+
 }
 
 void init_str_arr(ppstring_array arr) {

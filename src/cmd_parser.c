@@ -3,11 +3,43 @@
 #include <job.h>
 #include <string.h>
 #include <stdio.h>
-#define E_NOEND -1
 
-int sep_pipes(char *cmdline,pstring_array* recv) {
-    //管道支持
-    static pstring_array arrs;
+//简单重定向
+char sep_redirect(char* cmdline,pstring_array* recv) {
+    pstring_array arrs;
+    init_str_arr(&arrs);
+    char* buf = cmdline;
+    size_t sz = strlen(cmdline);
+    while(*buf && (*buf == ' ')) buf++;
+    while(buf < cmdline + sz) {
+        pstring str;
+        init_str(&str);
+        char st_chr = *buf;
+        if(*buf && buf != cmdline) {
+            append_chr(str,*buf); //加进去
+            buf++;
+        }
+        int allBlank = 1;
+        while(*buf && *buf != '>' && *buf != '<') {
+            if(*buf != ' ') allBlank = 0;
+            append_chr(str,*buf);
+            buf++;
+        }
+        push_to_arr(arrs,str);
+        if(allBlank == 1) {
+            *recv = arrs;
+            return st_chr;
+        }
+    }
+
+    *recv = arrs;
+    return 0;
+}
+
+//管道支持
+char sep_pipes(char *cmdline,pstring_array* recv) {
+
+    pstring_array arrs;
     init_str_arr(&arrs);
 
     size_t sz = strlen(cmdline);
@@ -15,11 +47,17 @@ int sep_pipes(char *cmdline,pstring_array* recv) {
     while(*buf && (*buf == ' '))
         buf++;
     while(buf < cmdline + sz) {
+        int allBlank = 1;
         pstring str;
         init_str(&str);
         while(*buf && *buf != '|') {
+            if(*buf != ' ') allBlank = 0;
             append_chr(str,*buf);
             buf++;
+        }
+        if(allBlank) {
+            *recv = arrs;
+            return *buf; //parse error
         }
         push_to_arr(arrs,str);
         if(*buf && *buf == '|') buf++;

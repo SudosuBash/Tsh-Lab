@@ -225,7 +225,7 @@ void do_bgfg(char **argv)
         }
         //endptr
         j = jstatus(jid);
-        pgid = jid2pgid(pgid);
+        pgid = jid2pgid(jid);
         if(j == UNDEF) {
             printf("E: No such job: [%d].\n",jid);
             return;

@@ -22,7 +22,8 @@ int rd_command(char cmdline[MAXLINE]) { //读取命令
     rd_cmd_loop_start:
         if(strl > 0 && cmdline[strl-1] == '|') 
             printf("pipe");
-            
+        if(strl > 0 && (cmdline[strl-1] == '<' || cmdline[strl-1] == '>'))
+            printf("'%c'",cmdline[strl-1]);
         printf("%s",end);
         char buf[MAXLINE] = {0};
         if ((fgets(buf, MAXLINE, stdin) == NULL) && ferror(stdin))
@@ -43,7 +44,7 @@ int rd_command(char cmdline[MAXLINE]) { //读取命令
             printf("\'\\\'");
             goto rd_cmd_loop_start;
         }
-    } while(cmdline[strl-1] == '|');
+    } while(cmdline[strl-1] == '|' || cmdline[strl-1] == '>' || cmdline[strl-1] == '<');
     return strl != 0;
 }
 
