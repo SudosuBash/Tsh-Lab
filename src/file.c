@@ -13,7 +13,10 @@ int file_open(char* str) {
     }
     int fd = 0;
     if(direction) {
-        fd = open(buf,O_WRONLY | O_CREAT, 0755);
+        int flag = O_WRONLY | O_CREAT;
+        if((*str == '>' && *(str+1) == '>')) 
+            flag |= O_APPEND;
+        fd = open(buf,flag, 0755);
         if(fd < 0) return -1;
     } else {
         fd = open(buf,O_RDONLY);

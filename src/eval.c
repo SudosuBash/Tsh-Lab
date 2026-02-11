@@ -100,7 +100,8 @@ void pipe_eval(char cmdline[MAXLINE]) {
                     printf("E: command %s not found.\n",argv[0]);
                     _exit(0);
                 } else {
-                    unix_error("execvp error.\n");
+                    fprintf(stderr,"E: program %s exec failed: ",argv[0]);
+                    perror("");
                     _exit(0);
                 }
             }

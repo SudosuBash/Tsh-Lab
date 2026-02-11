@@ -18,6 +18,11 @@ char sep_redirect(char* cmdline,pstring_array* recv) {
         if(*buf && buf != cmdline) {
             append_chr(str,*buf); //加进去
             buf++;
+            char prv = *(buf-1);
+            if(prv == '>' &&  prv == buf[0]) {
+                append_chr(str,*buf); //加进去
+                buf++;
+            } //目前就解析 '>>'       
         }
         int allBlank = 1;
         while(*buf && *buf != '>' && *buf != '<') {
